@@ -1,0 +1,5642 @@
+{
+    "swagger": "2.0",
+    "info": {
+      "title": "CalDoc API",
+      "description": "API documentation for CalDoc application",
+      "termsOfService": "https://www.google.com/policies/terms/",
+      "contact": {
+        "email": "contact@caldoc.example"
+      },
+      "license": {
+        "name": "Proprietary"
+      },
+      "version": "v1"
+    },
+    "host": "localhost:8001",
+    "schemes": [
+      "http",
+      "https"
+    ],
+    "basePath": "/api/v1",
+    "consumes": [
+      "application/json"
+    ],
+    "produces": [
+      "application/json"
+    ],
+    "securityDefinitions": {
+      "Basic": {
+        "type": "basic"
+      }
+    },
+    "security": [
+      {
+        "Basic": []
+      }
+    ],
+    "paths": {
+      "/frontend/appointments/reschedule/": {
+        "post": {
+          "operationId": "frontend_appointments_reschedule_create",
+          "summary": "POST /api/v1/appointments/reschedule/",
+          "description": "Marks an appointment chain for reschedule.\n\nRequired parameters:\n- booking_number: The unique identifier for the appointment/appointment chain\n- change_reason: The reason for reschedule",
+          "parameters": [],
+          "responses": {
+            "201": {
+              "description": ""
+            }
+          },
+          "tags": [
+            "frontend"
+          ]
+        },
+        "parameters": []
+      },
+      "/frontend/blocker_search/": {
+        "get": {
+          "operationId": "frontend_blocker_search_list",
+          "description": "Search blocker appointments with flexible filters. Omitted parameters are ignored. The endpoint always returns only appointments where status='blocker'.",
+          "parameters": [
+            {
+              "name": "date_from",
+              "in": "query",
+              "description": "YYYY‑MM‑DD  – scheduled date ≥ value",
+              "type": "string"
+            },
+            {
+              "name": "date_to",
+              "in": "query",
+              "description": "YYYY‑MM‑DD  – scheduled date ≤ value",
+              "type": "string"
+            },
+            {
+              "name": "datetime_from",
+              "in": "query",
+              "description": "ISO datetime – scheduled_for ≥ value",
+              "type": "string"
+            },
+            {
+              "name": "datetime_to",
+              "in": "query",
+              "description": "ISO datetime – scheduled_for ≤ value",
+              "type": "string"
+            },
+            {
+              "name": "room_id",
+              "in": "query",
+              "description": "Room primary key",
+              "type": "integer"
+            },
+            {
+              "name": "employee_id",
+              "in": "query",
+              "description": "Employee primary key",
+              "type": "integer"
+            },
+            {
+              "name": "booking_number",
+              "in": "query",
+              "description": "Exact booking number",
+              "type": "integer"
+            },
+            {
+              "name": "day",
+              "in": "query",
+              "description": "Week‑day code: mon … sun",
+              "type": "string"
+            },
+            {
+              "name": "comment",
+              "in": "query",
+              "description": "Substring search in comment",
+              "type": "string"
+            },
+            {
+              "name": "duration_min",
+              "in": "query",
+              "description": "duration_in_minutes ≥ value",
+              "type": "integer"
+            },
+            {
+              "name": "duration_max",
+              "in": "query",
+              "description": "duration_in_minutes ≤ value",
+              "type": "integer"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": ""
+            }
+          },
+          "tags": [
+            "frontend"
+          ]
+        },
+        "parameters": []
+      },
+      "/frontend/blockers/": {
+        "get": {
+          "operationId": "frontend_blockers_list",
+          "description": "Get all blocker appointments for a given date.",
+          "parameters": [
+            {
+              "name": "date",
+              "in": "query",
+              "description": "Date to get blockers for (format: YYYY-MM-DD)",
+              "required": true,
+              "type": "string",
+              "format": "date"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/Appointment"
+                }
+              }
+            },
+            "400": {
+              "description": "Bad Request (Missing or invalid date format)"
+            },
+            "500": {
+              "description": "Internal Server Error"
+            }
+          },
+          "tags": [
+            "frontend"
+          ]
+        },
+        "post": {
+          "operationId": "frontend_blockers_create",
+          "description": "Create a new blocker appointment",
+          "parameters": [],
+          "responses": {
+            "201": {
+              "description": ""
+            }
+          },
+          "tags": [
+            "frontend"
+          ]
+        },
+        "put": {
+          "operationId": "frontend_blockers_update",
+          "description": "Update an existing blocker appointment",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": ""
+            }
+          },
+          "tags": [
+            "frontend"
+          ]
+        },
+        "delete": {
+          "operationId": "frontend_blockers_delete",
+          "description": "Deletes blocker appointments. Provide *either* 'id' (optionally with 'del_all') *or* 'booking_number'.\n\n- Using `id`: Deletes a specific blocker. If `del_all=true` is also provided, the entire chain of linked blockers will be deleted. Otherwise (or if `del_all=false`), only the specified blocker is deleted, and its links within any chain are updated.\n- Using `booking_number`: Deletes all blockers associated with the given booking number. The `del_all` parameter is ignored in this case.",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "query",
+              "description": "ID of a specific blocker to delete. Mutually exclusive with booking_number.",
+              "required": false,
+              "type": "integer"
+            },
+            {
+              "name": "booking_number",
+              "in": "query",
+              "description": "Booking number to delete all associated blockers. Mutually exclusive with id.",
+              "required": false,
+              "type": "integer"
+            },
+            {
+              "name": "del_all",
+              "in": "query",
+              "description": "If true and 'id' is provided, deletes the entire chain of linked blockers. Defaults to false. Ignored if 'booking_number' is used.",
+              "required": false,
+              "type": "boolean"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Deleted",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "string",
+                    "example": "Successfully deleted blocker with ID 1 / Successfully deleted 5 blockers with booking_number X / Successfully deleted entire chain (3 blockers) associated with ID Y"
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "frontend"
+          ]
+        },
+        "parameters": []
+      },
+      "/frontend/bookable-slots/": {
+        "get": {
+          "operationId": "frontend_bookable-slots_list",
+          "description": "Return the bookable configuration time ranges per room for a given day & location.\n        A range corresponds to an AppointmentTypeConfiguration belonging to the supplied location and weekday.\n        Ranges inherit the *bookable* flag from their configuration record.",
+          "parameters": [
+            {
+              "name": "date",
+              "in": "query",
+              "description": "Date in YYYY-MM-DD format",
+              "required": true,
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "name": "location_id",
+              "in": "query",
+              "description": "DoctorsOfficeLocation primary key",
+              "required": true,
+              "type": "integer"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "room_id": {
+                          "type": "string"
+                        },
+                        "ranges": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "start": {
+                                "type": "string",
+                                "example": "08:00:00"
+                              },
+                              "end": {
+                                "type": "string",
+                                "example": "12:00:00"
+                              },
+                              "bookable": {
+                                "type": "boolean",
+                                "example": true
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "frontend"
+          ]
+        },
+        "parameters": []
+      },
+      "/frontend/bulk-blockers/": {
+        "get": {
+          "operationId": "frontend_bulk-blockers_list",
+          "description": "Retrieve a summary of the entire blocker chain belonging to the supplied blocker id.",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "query",
+              "description": "ID of any blocker inside the chain",
+              "required": true,
+              "type": "integer"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "description": "ID of the first blocker in chain",
+                        "type": "integer"
+                      },
+                      "booking_number": {
+                        "type": "integer"
+                      },
+                      "from_datetime": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "to_datetime": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "duration_in_minutes": {
+                        "type": "integer"
+                      },
+                      "room_ids": {
+                        "type": "array",
+                        "items": {
+                          "type": "integer"
+                        }
+                      },
+                      "room_names": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "comment": {
+                        "type": "string"
+                      },
+                      "appointment_type_id": {
+                        "type": "integer"
+                      },
+                      "appointment_type_name": {
+                        "type": "string"
+                      },
+                      "status": {
+                        "type": "string"
+                      },
+                      "count": {
+                        "description": "Number of blockers in chain",
+                        "type": "integer"
+                      },
+                      "weekdays": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "frontend"
+          ]
+        },
+        "post": {
+          "operationId": "frontend_bulk-blockers_create",
+          "description": "Bulk create blocker appointments (recurring series)",
+          "parameters": [
+            {
+              "name": "data",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "required": [
+                  "start_from",
+                  "duration_in_minutes",
+                  "days",
+                  "until",
+                  "room_ids"
+                ],
+                "type": "object",
+                "properties": {
+                  "start_from": {
+                    "type": "string",
+                    "example": "2025-05-01T09:00"
+                  },
+                  "duration_in_minutes": {
+                    "type": "integer",
+                    "example": 120
+                  },
+                  "days": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "example": "mon"
+                    }
+                  },
+                  "until": {
+                    "type": "string",
+                    "example": "2025-06-01"
+                  },
+                  "room_ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer",
+                      "example": 1
+                    }
+                  },
+                  "comment": {
+                    "type": "string",
+                    "example": "Team meeting"
+                  },
+                  "employee": {
+                    "type": "integer",
+                    "example": 7
+                  },
+                  "appointment_type": {
+                    "type": "integer",
+                    "example": 2
+                  },
+                  "status": {
+                    "type": "string",
+                    "example": "created"
+                  }
+                }
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "Created",
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/Appointment"
+                }
+              }
+            }
+          },
+          "tags": [
+            "frontend"
+          ]
+        },
+        "put": {
+          "operationId": "frontend_bulk-blockers_update",
+          "description": "Bulk update blocker appointments",
+          "parameters": [
+            {
+              "name": "data",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "required": [
+                  "updates"
+                ],
+                "type": "object",
+                "properties": {
+                  "updates": {
+                    "type": "array",
+                    "items": {
+                      "required": [
+                        "id"
+                      ],
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "example": 1
+                        },
+                        "duration_in_minutes": {
+                          "type": "integer",
+                          "example": 90
+                        },
+                        "scheduled_for_datetime": {
+                          "type": "string",
+                          "example": "2025-05-03T10:00"
+                        },
+                        "room": {
+                          "type": "integer",
+                          "example": 4
+                        },
+                        "employee": {
+                          "type": "integer",
+                          "example": 8
+                        },
+                        "comment": {
+                          "type": "string",
+                          "example": "Updated remark"
+                        },
+                        "appointment_type": {
+                          "type": "integer",
+                          "example": 2
+                        },
+                        "status": {
+                          "type": "string",
+                          "example": "blocker"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Updated",
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/Appointment"
+                }
+              }
+            }
+          },
+          "tags": [
+            "frontend"
+          ]
+        },
+        "parameters": []
+      },
+      "/frontend/doctors-office-locations/": {
+        "get": {
+          "operationId": "frontend_doctors-office-locations_list",
+          "description": "",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": ""
+            }
+          },
+          "tags": [
+            "frontend"
+          ]
+        },
+        "parameters": []
+      },
+      "/frontend/doctors/": {
+        "get": {
+          "operationId": "frontend_doctors_list",
+          "description": "",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": ""
+            }
+          },
+          "tags": [
+            "frontend"
+          ]
+        },
+        "parameters": []
+      },
+      "/frontend/location-blockers/": {
+        "get": {
+          "operationId": "frontend_location-blockers_list",
+          "description": "Retrieve summaries of all blocker chains for a specific location.",
+          "parameters": [
+            {
+              "name": "location",
+              "in": "query",
+              "description": "Location ID to filter blockers by",
+              "required": true,
+              "type": "integer"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "description": "ID of the first blocker in chain",
+                          "type": "integer"
+                        },
+                        "booking_number": {
+                          "type": "integer"
+                        },
+                        "from_datetime": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "to_datetime": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "duration_in_minutes": {
+                          "type": "integer"
+                        },
+                        "room_ids": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer"
+                          }
+                        },
+                        "room_names": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "comment": {
+                          "type": "string"
+                        },
+                        "appointment_type_id": {
+                          "type": "integer"
+                        },
+                        "appointment_type_name": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "count": {
+                          "description": "Number of blockers in chain",
+                          "type": "integer"
+                        },
+                        "weekdays": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "frontend"
+          ]
+        },
+        "parameters": []
+      },
+      "/frontend/rooms/": {
+        "get": {
+          "operationId": "frontend_rooms_list",
+          "description": "",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": ""
+            }
+          },
+          "tags": [
+            "frontend"
+          ]
+        },
+        "parameters": []
+      },
+      "/management/addresses/": {
+        "get": {
+          "operationId": "management_addresses_list",
+          "description": "Get all addresses",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "example": 1
+                        },
+                        "street": {
+                          "type": "string",
+                          "example": "Main Street"
+                        },
+                        "street_number": {
+                          "type": "integer",
+                          "example": 123
+                        },
+                        "city": {
+                          "type": "integer",
+                          "example": 1
+                        },
+                        "city_id": {
+                          "type": "integer",
+                          "example": 1
+                        },
+                        "updated_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "example": "2023-01-15T10:30:00Z"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "management"
+          ]
+        },
+        "post": {
+          "operationId": "management_addresses_create",
+          "description": "Create a new address",
+          "parameters": [
+            {
+              "name": "data",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "required": [
+                  "street",
+                  "street_number",
+                  "city"
+                ],
+                "type": "object",
+                "properties": {
+                  "street": {
+                    "type": "string",
+                    "example": "Main Street"
+                  },
+                  "street_number": {
+                    "type": "integer",
+                    "example": 123
+                  },
+                  "city": {
+                    "type": "integer",
+                    "example": 1
+                  }
+                }
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "example": 1
+                      },
+                      "street": {
+                        "type": "string",
+                        "example": "Main Street"
+                      },
+                      "street_number": {
+                        "type": "integer",
+                        "example": 123
+                      },
+                      "city": {
+                        "type": "integer",
+                        "example": 1
+                      },
+                      "city_id": {
+                        "type": "integer",
+                        "example": 1
+                      },
+                      "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2023-01-15T10:30:00Z"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "management"
+          ]
+        },
+        "parameters": []
+      },
+      "/management/addresses/{id}/": {
+        "get": {
+          "operationId": "management_addresses_read",
+          "description": "Get an address by ID",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "example": 1
+                      },
+                      "street": {
+                        "type": "string",
+                        "example": "Main Street"
+                      },
+                      "street_number": {
+                        "type": "integer",
+                        "example": 123
+                      },
+                      "city": {
+                        "type": "integer",
+                        "example": 1
+                      },
+                      "city_id": {
+                        "type": "integer",
+                        "example": 1
+                      },
+                      "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2023-01-15T10:30:00Z"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "management"
+          ]
+        },
+        "put": {
+          "operationId": "management_addresses_update",
+          "description": "Update an address",
+          "parameters": [
+            {
+              "name": "data",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "required": [
+                  "street",
+                  "street_number",
+                  "city"
+                ],
+                "type": "object",
+                "properties": {
+                  "street": {
+                    "type": "string",
+                    "example": "Main Street"
+                  },
+                  "street_number": {
+                    "type": "integer",
+                    "example": 123
+                  },
+                  "city": {
+                    "type": "integer",
+                    "example": 1
+                  }
+                }
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "example": 1
+                      },
+                      "street": {
+                        "type": "string",
+                        "example": "Main Street"
+                      },
+                      "street_number": {
+                        "type": "integer",
+                        "example": 123
+                      },
+                      "city": {
+                        "type": "integer",
+                        "example": 1
+                      },
+                      "city_id": {
+                        "type": "integer",
+                        "example": 1
+                      },
+                      "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2023-01-15T10:30:00Z"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "management"
+          ]
+        },
+        "delete": {
+          "operationId": "management_addresses_delete",
+          "description": "Delete an address",
+          "parameters": [],
+          "responses": {
+            "204": {
+              "description": "Address deleted successfully"
+            }
+          },
+          "tags": [
+            "management"
+          ]
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ]
+      },
+      "/management/appointment-configurations/": {
+        "get": {
+          "operationId": "management_appointment-configurations_list",
+          "description": "Get all appointment configurations",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "example": 1
+                        },
+                        "group": {
+                          "type": "integer",
+                          "example": 1
+                        },
+                        "employee_id": {
+                          "type": "integer",
+                          "example": 2
+                        },
+                        "appointment_type_id": {
+                          "type": "integer",
+                          "example": 1
+                        },
+                        "address_id": {
+                          "type": "integer",
+                          "example": 3
+                        },
+                        "room_id": {
+                          "type": "integer",
+                          "example": 2
+                        },
+                        "duration_in_minutes": {
+                          "type": "integer",
+                          "example": 30
+                        },
+                        "day": {
+                          "type": "string",
+                          "example": "mon"
+                        },
+                        "time_from": {
+                          "type": "string",
+                          "example": "09:00:00"
+                        },
+                        "time_to": {
+                          "type": "string",
+                          "example": "17:00:00"
+                        },
+                        "valid_from": {
+                          "type": "string",
+                          "format": "date",
+                          "example": "2023-01-01"
+                        },
+                        "valid_to": {
+                          "type": "string",
+                          "format": "date",
+                          "example": "2024-12-31"
+                        },
+                        "number_in_series": {
+                          "type": "integer",
+                          "example": 1
+                        },
+                        "intraday": {
+                          "type": "boolean",
+                          "example": true
+                        },
+                        "consecutive": {
+                          "type": "boolean",
+                          "example": false
+                        },
+                        "friendly_name": {
+                          "type": "string",
+                          "example": "Morning Checkup"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "management"
+          ]
+        },
+        "post": {
+          "operationId": "management_appointment-configurations_create",
+          "description": "Create a new appointment configuration",
+          "parameters": [
+            {
+              "name": "data",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "required": [
+                  "employee_id",
+                  "appointment_type_id",
+                  "address_id",
+                  "room_id",
+                  "duration_in_minutes",
+                  "day",
+                  "time_from",
+                  "time_to"
+                ],
+                "type": "object",
+                "properties": {
+                  "group": {
+                    "type": "integer",
+                    "example": 1
+                  },
+                  "employee_id": {
+                    "type": "integer",
+                    "example": 2
+                  },
+                  "appointment_type_id": {
+                    "type": "integer",
+                    "example": 1
+                  },
+                  "address_id": {
+                    "type": "integer",
+                    "example": 3
+                  },
+                  "room_id": {
+                    "type": "integer",
+                    "example": 2
+                  },
+                  "duration_in_minutes": {
+                    "type": "integer",
+                    "example": 30
+                  },
+                  "day": {
+                    "type": "string",
+                    "example": "mon"
+                  },
+                  "time_from": {
+                    "type": "string",
+                    "example": "09:00:00"
+                  },
+                  "time_to": {
+                    "type": "string",
+                    "example": "17:00:00"
+                  },
+                  "valid_from": {
+                    "description": "Date from which this configuration is valid (YYYY-MM-DD). Defaults to current date if not provided.",
+                    "type": "string",
+                    "format": "date",
+                    "example": "2023-01-01"
+                  },
+                  "valid_to": {
+                    "description": "Date until which this configuration is valid (YYYY-MM-DD). Optional, leave empty if valid indefinitely.",
+                    "type": "string",
+                    "format": "date",
+                    "example": "2024-12-31"
+                  },
+                  "bookable": {
+                    "description": "Whether this configuration can be booked. Defaults to True if not provided.",
+                    "type": "boolean",
+                    "example": true
+                  },
+                  "number_in_series": {
+                    "description": "Order within a group for multi-step appointments. Defaults to 1.",
+                    "type": "integer",
+                    "example": 1
+                  },
+                  "intraday": {
+                    "description": "Whether this configuration should be considered intraday.",
+                    "type": "boolean",
+                    "example": true
+                  },
+                  "consecutive": {
+                    "description": "Whether consecutive booking is required.",
+                    "type": "boolean",
+                    "example": false
+                  },
+                  "friendly_name": {
+                    "description": "Optional user-friendly name for this configuration.",
+                    "type": "string",
+                    "example": "Morning Checkup"
+                  }
+                }
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "example": 1
+                      },
+                      "group": {
+                        "type": "integer",
+                        "example": 1
+                      },
+                      "employee_id": {
+                        "type": "integer",
+                        "example": 2
+                      },
+                      "appointment_type_id": {
+                        "type": "integer",
+                        "example": 1
+                      },
+                      "address_id": {
+                        "type": "integer",
+                        "example": 3
+                      },
+                      "room_id": {
+                        "type": "integer",
+                        "example": 2
+                      },
+                      "duration_in_minutes": {
+                        "type": "integer",
+                        "example": 30
+                      },
+                      "day": {
+                        "type": "string",
+                        "example": "mon"
+                      },
+                      "time_from": {
+                        "type": "string",
+                        "example": "09:00:00"
+                      },
+                      "time_to": {
+                        "type": "string",
+                        "example": "17:00:00"
+                      },
+                      "valid_from": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2023-01-01"
+                      },
+                      "valid_to": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2024-12-31"
+                      },
+                      "number_in_series": {
+                        "type": "integer",
+                        "example": 1
+                      },
+                      "intraday": {
+                        "type": "boolean",
+                        "example": true
+                      },
+                      "consecutive": {
+                        "type": "boolean",
+                        "example": false
+                      },
+                      "friendly_name": {
+                        "type": "string",
+                        "example": "Morning Checkup"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "management"
+          ]
+        },
+        "parameters": []
+      },
+      "/management/appointment-configurations/by-location/": {
+        "get": {
+          "operationId": "management_appointment-configurations_by-location_list",
+          "description": "Get appointment type configurations filtered by location",
+          "parameters": [
+            {
+              "name": "location_id",
+              "in": "query",
+              "description": "ID of the location to filter by",
+              "required": true,
+              "type": "integer"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "room": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "integer"
+                            },
+                            "name": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "time_from": {
+                          "type": "string"
+                        },
+                        "time_to": {
+                          "type": "string"
+                        },
+                        "employee": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "integer"
+                            },
+                            "name": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "appointment_type": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "integer"
+                            },
+                            "name": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "management"
+          ]
+        },
+        "parameters": []
+      },
+      "/management/appointment-configurations/{id}/": {
+        "get": {
+          "operationId": "management_appointment-configurations_read",
+          "description": "Get an appointment configuration by ID",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "example": 1
+                      },
+                      "group": {
+                        "type": "integer",
+                        "example": 1
+                      },
+                      "employee_id": {
+                        "type": "integer",
+                        "example": 2
+                      },
+                      "appointment_type_id": {
+                        "type": "integer",
+                        "example": 1
+                      },
+                      "address_id": {
+                        "type": "integer",
+                        "example": 3
+                      },
+                      "room_id": {
+                        "type": "integer",
+                        "example": 2
+                      },
+                      "duration_in_minutes": {
+                        "type": "integer",
+                        "example": 30
+                      },
+                      "day": {
+                        "type": "string",
+                        "example": "mon"
+                      },
+                      "time_from": {
+                        "type": "string",
+                        "example": "09:00:00"
+                      },
+                      "time_to": {
+                        "type": "string",
+                        "example": "17:00:00"
+                      },
+                      "valid_from": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2023-01-01"
+                      },
+                      "valid_to": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2024-12-31"
+                      },
+                      "number_in_series": {
+                        "type": "integer",
+                        "example": 1
+                      },
+                      "intraday": {
+                        "type": "boolean",
+                        "example": true
+                      },
+                      "consecutive": {
+                        "type": "boolean",
+                        "example": false
+                      },
+                      "friendly_name": {
+                        "type": "string",
+                        "example": "Morning Checkup"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "management"
+          ]
+        },
+        "put": {
+          "operationId": "management_appointment-configurations_update",
+          "description": "Update an appointment configuration",
+          "parameters": [
+            {
+              "name": "data",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "required": [
+                  "employee_id",
+                  "appointment_type_id",
+                  "address_id",
+                  "room_id",
+                  "duration_in_minutes",
+                  "day",
+                  "time_from",
+                  "time_to"
+                ],
+                "type": "object",
+                "properties": {
+                  "group": {
+                    "type": "integer",
+                    "example": 1
+                  },
+                  "employee_id": {
+                    "type": "integer",
+                    "example": 2
+                  },
+                  "appointment_type_id": {
+                    "type": "integer",
+                    "example": 1
+                  },
+                  "address_id": {
+                    "type": "integer",
+                    "example": 3
+                  },
+                  "room_id": {
+                    "type": "integer",
+                    "example": 2
+                  },
+                  "duration_in_minutes": {
+                    "type": "integer",
+                    "example": 30
+                  },
+                  "day": {
+                    "type": "string",
+                    "example": "mon"
+                  },
+                  "time_from": {
+                    "type": "string",
+                    "example": "09:00:00"
+                  },
+                  "time_to": {
+                    "type": "string",
+                    "example": "17:00:00"
+                  },
+                  "valid_from": {
+                    "description": "Date from which this configuration is valid (YYYY-MM-DD). Defaults to current date if not provided.",
+                    "type": "string",
+                    "format": "date",
+                    "example": "2023-01-01"
+                  },
+                  "valid_to": {
+                    "description": "Date until which this configuration is valid (YYYY-MM-DD). Optional, leave empty if valid indefinitely.",
+                    "type": "string",
+                    "format": "date",
+                    "example": "2024-12-31"
+                  },
+                  "bookable": {
+                    "description": "Whether this configuration can be booked. Defaults to True if not provided.",
+                    "type": "boolean",
+                    "example": true
+                  },
+                  "number_in_series": {
+                    "description": "Order within a group for multi-step appointments. Defaults to 1.",
+                    "type": "integer",
+                    "example": 1
+                  },
+                  "intraday": {
+                    "description": "Whether this configuration should be considered intraday.",
+                    "type": "boolean",
+                    "example": true
+                  },
+                  "consecutive": {
+                    "description": "Whether consecutive booking is required.",
+                    "type": "boolean",
+                    "example": false
+                  },
+                  "friendly_name": {
+                    "description": "Optional user-friendly name for this configuration.",
+                    "type": "string",
+                    "example": "Morning Checkup"
+                  }
+                }
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "example": 1
+                      },
+                      "group": {
+                        "type": "integer",
+                        "example": 1
+                      },
+                      "employee_id": {
+                        "type": "integer",
+                        "example": 2
+                      },
+                      "appointment_type_id": {
+                        "type": "integer",
+                        "example": 1
+                      },
+                      "address_id": {
+                        "type": "integer",
+                        "example": 3
+                      },
+                      "room_id": {
+                        "type": "integer",
+                        "example": 2
+                      },
+                      "duration_in_minutes": {
+                        "type": "integer",
+                        "example": 30
+                      },
+                      "day": {
+                        "type": "string",
+                        "example": "mon"
+                      },
+                      "time_from": {
+                        "type": "string",
+                        "example": "09:00:00"
+                      },
+                      "time_to": {
+                        "type": "string",
+                        "example": "17:00:00"
+                      },
+                      "valid_from": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2023-01-01"
+                      },
+                      "valid_to": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2024-12-31"
+                      },
+                      "number_in_series": {
+                        "type": "integer",
+                        "example": 1
+                      },
+                      "intraday": {
+                        "type": "boolean",
+                        "example": true
+                      },
+                      "consecutive": {
+                        "type": "boolean",
+                        "example": false
+                      },
+                      "friendly_name": {
+                        "type": "string",
+                        "example": "Morning Checkup"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "management"
+          ]
+        },
+        "delete": {
+          "operationId": "management_appointment-configurations_delete",
+          "description": "Delete an appointment configuration",
+          "parameters": [],
+          "responses": {
+            "204": {
+              "description": "Appointment configuration deleted successfully"
+            }
+          },
+          "tags": [
+            "management"
+          ]
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ]
+      },
+      "/management/appointment-type-aliases/": {
+        "get": {
+          "operationId": "management_appointment-type-aliases_list",
+          "description": "Get all appointment type aliases",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "example": 1
+                        },
+                        "appointment_type_id": {
+                          "type": "integer",
+                          "example": 2
+                        },
+                        "alias": {
+                          "type": "string",
+                          "example": "General Check"
+                        },
+                        "updated_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "example": "2023-01-15T10:30:00Z"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "management"
+          ]
+        },
+        "post": {
+          "operationId": "management_appointment-type-aliases_create",
+          "description": "Create a new appointment type alias",
+          "parameters": [
+            {
+              "name": "data",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "required": [
+                  "appointment_type",
+                  "alias"
+                ],
+                "type": "object",
+                "properties": {
+                  "appointment_type": {
+                    "type": "integer",
+                    "example": 2
+                  },
+                  "alias": {
+                    "type": "string",
+                    "example": "General Check"
+                  }
+                }
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "example": 1
+                      },
+                      "appointment_type_id": {
+                        "type": "integer",
+                        "example": 2
+                      },
+                      "alias": {
+                        "type": "string",
+                        "example": "General Check"
+                      },
+                      "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2023-01-15T10:30:00Z"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "management"
+          ]
+        },
+        "parameters": []
+      },
+      "/management/appointment-type-aliases/{id}/": {
+        "get": {
+          "operationId": "management_appointment-type-aliases_read",
+          "description": "Get an appointment type alias by ID",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "example": 1
+                      },
+                      "appointment_type_id": {
+                        "type": "integer",
+                        "example": 2
+                      },
+                      "alias": {
+                        "type": "string",
+                        "example": "General Check"
+                      },
+                      "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2023-01-15T10:30:00Z"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "management"
+          ]
+        },
+        "put": {
+          "operationId": "management_appointment-type-aliases_update",
+          "description": "Update an appointment type alias",
+          "parameters": [
+            {
+              "name": "data",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "required": [
+                  "appointment_type",
+                  "alias"
+                ],
+                "type": "object",
+                "properties": {
+                  "appointment_type": {
+                    "type": "integer",
+                    "example": 2
+                  },
+                  "alias": {
+                    "type": "string",
+                    "example": "General Check"
+                  }
+                }
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "example": 1
+                      },
+                      "appointment_type_id": {
+                        "type": "integer",
+                        "example": 2
+                      },
+                      "alias": {
+                        "type": "string",
+                        "example": "General Check"
+                      },
+                      "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2023-01-15T10:30:00Z"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "management"
+          ]
+        },
+        "delete": {
+          "operationId": "management_appointment-type-aliases_delete",
+          "description": "Delete an appointment type alias",
+          "parameters": [],
+          "responses": {
+            "204": {
+              "description": "Appointment type alias deleted successfully"
+            }
+          },
+          "tags": [
+            "management"
+          ]
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ]
+      },
+      "/management/appointment-types/": {
+        "get": {
+          "operationId": "management_appointment-types_list",
+          "description": "Get all appointment types",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "example": 1
+                        },
+                        "type": {
+                          "type": "string",
+                          "example": "General Checkup"
+                        },
+                        "macro_type": {
+                          "type": "string",
+                          "example": "Primary Care"
+                        },
+                        "updated_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "example": "2023-01-15T10:30:00Z"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "management"
+          ]
+        },
+        "post": {
+          "operationId": "management_appointment-types_create",
+          "description": "Create a new appointment type",
+          "parameters": [
+            {
+              "name": "data",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "required": [
+                  "type"
+                ],
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "General Checkup"
+                  },
+                  "macro_type": {
+                    "type": "string",
+                    "example": "Primary Care"
+                  },
+                  "bookable": {
+                    "type": "boolean",
+                    "example": true
+                  }
+                }
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "example": 1
+                      },
+                      "type": {
+                        "type": "string",
+                        "example": "General Checkup"
+                      },
+                      "macro_type": {
+                        "type": "string",
+                        "example": "Primary Care"
+                      },
+                      "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2023-01-15T10:30:00Z"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "management"
+          ]
+        },
+        "parameters": []
+      },
+      "/management/appointment-types/{id}/": {
+        "get": {
+          "operationId": "management_appointment-types_read",
+          "description": "Get an appointment type by ID",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "example": 1
+                      },
+                      "type": {
+                        "type": "string",
+                        "example": "General Checkup"
+                      },
+                      "macro_type": {
+                        "type": "string",
+                        "example": "Primary Care"
+                      },
+                      "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2023-01-15T10:30:00Z"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "management"
+          ]
+        },
+        "put": {
+          "operationId": "management_appointment-types_update",
+          "description": "Update an appointment type",
+          "parameters": [
+            {
+              "name": "data",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "required": [
+                  "type"
+                ],
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "General Checkup"
+                  },
+                  "macro_type": {
+                    "type": "string",
+                    "example": "Primary Care"
+                  },
+                  "bookable": {
+                    "type": "boolean",
+                    "example": true
+                  }
+                }
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "example": 1
+                      },
+                      "type": {
+                        "type": "string",
+                        "example": "General Checkup"
+                      },
+                      "macro_type": {
+                        "type": "string",
+                        "example": "Primary Care"
+                      },
+                      "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2023-01-15T10:30:00Z"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "management"
+          ]
+        },
+        "delete": {
+          "operationId": "management_appointment-types_delete",
+          "description": "Delete an appointment type",
+          "parameters": [],
+          "responses": {
+            "204": {
+              "description": "Appointment type deleted successfully"
+            }
+          },
+          "tags": [
+            "management"
+          ]
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ]
+      },
+      "/management/cities/": {
+        "get": {
+          "operationId": "management_cities_list",
+          "description": "Get all cities",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "example": 1
+                        },
+                        "city_code": {
+                          "type": "integer",
+                          "example": 10115
+                        },
+                        "city": {
+                          "type": "string",
+                          "example": "Berlin"
+                        },
+                        "state": {
+                          "type": "string",
+                          "example": "Berlin"
+                        },
+                        "country": {
+                          "type": "string",
+                          "example": "Germany"
+                        },
+                        "updated_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "example": "2023-01-15T10:30:00Z"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "management"
+          ]
+        },
+        "post": {
+          "operationId": "management_cities_create",
+          "description": "Create a new city",
+          "parameters": [
+            {
+              "name": "data",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "required": [
+                  "city_code",
+                  "city",
+                  "state",
+                  "country"
+                ],
+                "type": "object",
+                "properties": {
+                  "city_code": {
+                    "type": "integer",
+                    "example": 10115
+                  },
+                  "city": {
+                    "type": "string",
+                    "example": "Berlin"
+                  },
+                  "state": {
+                    "type": "string",
+                    "example": "Berlin"
+                  },
+                  "country": {
+                    "type": "string",
+                    "example": "Germany"
+                  }
+                }
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "example": 1
+                      },
+                      "city_code": {
+                        "type": "integer",
+                        "example": 10115
+                      },
+                      "city": {
+                        "type": "string",
+                        "example": "Berlin"
+                      },
+                      "state": {
+                        "type": "string",
+                        "example": "Berlin"
+                      },
+                      "country": {
+                        "type": "string",
+                        "example": "Germany"
+                      },
+                      "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2023-01-15T10:30:00Z"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "management"
+          ]
+        },
+        "parameters": []
+      },
+      "/management/cities/{id}/": {
+        "get": {
+          "operationId": "management_cities_read",
+          "description": "Get a city by ID",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "example": 1
+                      },
+                      "city_code": {
+                        "type": "integer",
+                        "example": 10115
+                      },
+                      "city": {
+                        "type": "string",
+                        "example": "Berlin"
+                      },
+                      "state": {
+                        "type": "string",
+                        "example": "Berlin"
+                      },
+                      "country": {
+                        "type": "string",
+                        "example": "Germany"
+                      },
+                      "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2023-01-15T10:30:00Z"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "management"
+          ]
+        },
+        "put": {
+          "operationId": "management_cities_update",
+          "description": "Update a city",
+          "parameters": [
+            {
+              "name": "data",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "required": [
+                  "city_code",
+                  "city",
+                  "state",
+                  "country"
+                ],
+                "type": "object",
+                "properties": {
+                  "city_code": {
+                    "type": "integer",
+                    "example": 10115
+                  },
+                  "city": {
+                    "type": "string",
+                    "example": "Berlin"
+                  },
+                  "state": {
+                    "type": "string",
+                    "example": "Berlin"
+                  },
+                  "country": {
+                    "type": "string",
+                    "example": "Germany"
+                  }
+                }
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "example": 1
+                      },
+                      "city_code": {
+                        "type": "integer",
+                        "example": 10115
+                      },
+                      "city": {
+                        "type": "string",
+                        "example": "Berlin"
+                      },
+                      "state": {
+                        "type": "string",
+                        "example": "Berlin"
+                      },
+                      "country": {
+                        "type": "string",
+                        "example": "Germany"
+                      },
+                      "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2023-01-15T10:30:00Z"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "management"
+          ]
+        },
+        "delete": {
+          "operationId": "management_cities_delete",
+          "description": "Delete a city",
+          "parameters": [],
+          "responses": {
+            "204": {
+              "description": "City deleted successfully"
+            }
+          },
+          "tags": [
+            "management"
+          ]
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ]
+      },
+      "/management/employees/": {
+        "get": {
+          "operationId": "management_employees_list",
+          "description": "Get all employees",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "example": 1
+                        },
+                        "title": {
+                          "type": "string",
+                          "example": "Dr."
+                        },
+                        "role": {
+                          "type": "string",
+                          "example": "Doctor"
+                        },
+                        "first_name": {
+                          "type": "string",
+                          "example": "John"
+                        },
+                        "last_name": {
+                          "type": "string",
+                          "example": "Smith"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "management"
+          ]
+        },
+        "post": {
+          "operationId": "management_employees_create",
+          "description": "Create a new employee",
+          "parameters": [
+            {
+              "name": "data",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "required": [
+                  "email",
+                  "first_name",
+                  "last_name",
+                  "role"
+                ],
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "example": "john.smith@example.com"
+                  },
+                  "first_name": {
+                    "type": "string",
+                    "example": "John"
+                  },
+                  "last_name": {
+                    "type": "string",
+                    "example": "Smith"
+                  },
+                  "title": {
+                    "type": "string",
+                    "example": "Dr."
+                  },
+                  "role": {
+                    "type": "string",
+                    "example": "Doctor"
+                  }
+                }
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "example": 1
+                      },
+                      "title": {
+                        "type": "string",
+                        "example": "Dr."
+                      },
+                      "role": {
+                        "type": "string",
+                        "example": "Doctor"
+                      },
+                      "first_name": {
+                        "type": "string",
+                        "example": "John"
+                      },
+                      "last_name": {
+                        "type": "string",
+                        "example": "Smith"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "management"
+          ]
+        },
+        "parameters": []
+      },
+      "/management/employees/{id}/": {
+        "get": {
+          "operationId": "management_employees_read",
+          "description": "Get an employee by ID",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "example": 1
+                      },
+                      "title": {
+                        "type": "string",
+                        "example": "Dr."
+                      },
+                      "role": {
+                        "type": "string",
+                        "example": "Doctor"
+                      },
+                      "first_name": {
+                        "type": "string",
+                        "example": "John"
+                      },
+                      "last_name": {
+                        "type": "string",
+                        "example": "Smith"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "management"
+          ]
+        },
+        "put": {
+          "operationId": "management_employees_update",
+          "description": "Update an employee",
+          "parameters": [
+            {
+              "name": "data",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "first_name": {
+                    "type": "string",
+                    "example": "John"
+                  },
+                  "last_name": {
+                    "type": "string",
+                    "example": "Smith"
+                  },
+                  "title": {
+                    "type": "string",
+                    "example": "Dr."
+                  },
+                  "role": {
+                    "type": "string",
+                    "example": "Doctor"
+                  }
+                }
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "example": 1
+                      },
+                      "title": {
+                        "type": "string",
+                        "example": "Dr."
+                      },
+                      "role": {
+                        "type": "string",
+                        "example": "Doctor"
+                      },
+                      "first_name": {
+                        "type": "string",
+                        "example": "John"
+                      },
+                      "last_name": {
+                        "type": "string",
+                        "example": "Smith"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "management"
+          ]
+        },
+        "delete": {
+          "operationId": "management_employees_delete",
+          "description": "Delete an employee",
+          "parameters": [],
+          "responses": {
+            "204": {
+              "description": "Employee deleted successfully"
+            }
+          },
+          "tags": [
+            "management"
+          ]
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ]
+      },
+      "/management/import-appointments/": {
+        "post": {
+          "operationId": "management_import-appointments_create",
+          "description": "Bulk import multiple appointments at once. Accepts an array of appointment objects.",
+          "parameters": [
+            {
+              "name": "data",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "config_id": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "John"
+                    },
+                    "surname": {
+                      "type": "string",
+                      "example": "Doe"
+                    },
+                    "date_of_birth": {
+                      "type": "string",
+                      "example": "1990-01-01"
+                    },
+                    "piz": {
+                      "type": "string",
+                      "example": "P12345"
+                    },
+                    "scheduled_for_datetime": {
+                      "type": "string",
+                      "example": "2023-05-01 10:30"
+                    },
+                    "doctors_office_location": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "entered_by": {
+                      "type": "string",
+                      "example": "api"
+                    },
+                    "status": {
+                      "type": "string",
+                      "example": "confirmed"
+                    },
+                    "relation_status": {
+                      "type": "string",
+                      "example": "self"
+                    },
+                    "insurance_provider": {
+                      "type": "string",
+                      "example": "AOK"
+                    },
+                    "comment": {
+                      "type": "string",
+                      "example": "Follow-up visit"
+                    },
+                    "duration_in_minutes": {
+                      "type": "integer",
+                      "example": 30
+                    },
+                    "appointment_type": {
+                      "type": "integer",
+                      "example": 2
+                    },
+                    "employee": {
+                      "type": "integer",
+                      "example": 5
+                    },
+                    "room": {
+                      "type": "integer",
+                      "example": 3
+                    },
+                    "phone_number": {
+                      "type": "string",
+                      "example": "+49123456789"
+                    },
+                    "email": {
+                      "type": "string",
+                      "example": "john.doe@example.com"
+                    },
+                    "anamnesis": {
+                      "type": "string",
+                      "example": "Patient history information"
+                    }
+                  }
+                }
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Import process completed with validation result",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  },
+                  "total_count": {
+                    "type": "integer"
+                  },
+                  "valid_count": {
+                    "type": "integer"
+                  },
+                  "invalid_count": {
+                    "type": "integer"
+                  },
+                  "processed_count": {
+                    "type": "integer"
+                  },
+                  "validation_summary": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "management"
+          ]
+        },
+        "parameters": []
+      },
+      "/management/kvdt-import/": {
+        "post": {
+          "operationId": "management_kvdt-import_create",
+          "description": "Manually trigger the import of KVDT files from the configured folder",
+          "parameters": [],
+          "responses": {
+            "202": {
+              "description": "Import task triggered successfully",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "example": "success"
+                  },
+                  "message": {
+                    "type": "string",
+                    "example": "KVDT import task has been triggered"
+                  },
+                  "task_id": {
+                    "type": "string",
+                    "example": "12345678-1234-1234-1234-123456789abc"
+                  }
+                }
+              }
+            },
+            "500": {
+              "description": "Error triggering import task",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "example": "error"
+                  },
+                  "message": {
+                    "type": "string",
+                    "example": "Failed to trigger KVDT import task"
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "management"
+          ]
+        },
+        "parameters": []
+      },
+      "/management/locations/": {
+        "get": {
+          "operationId": "management_locations_list",
+          "description": "Get all doctor's office locations",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "example": 1
+                        },
+                        "address_id": {
+                          "type": "integer",
+                          "example": 2
+                        },
+                        "phone_number": {
+                          "type": "string",
+                          "example": "+1234567890"
+                        },
+                        "friendly_name": {
+                          "type": "string",
+                          "example": "Main Office"
+                        },
+                        "updated_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "example": "2023-01-15T10:30:00Z"
+                        },
+                        "address_details": {
+                          "type": "object",
+                          "properties": {
+                            "street": {
+                              "type": "string",
+                              "example": "Main Street"
+                            },
+                            "street_number": {
+                              "type": "string",
+                              "example": "123"
+                            }
+                          }
+                        },
+                        "address_city": {
+                          "type": "object",
+                          "properties": {
+                            "city_code": {
+                              "type": "integer",
+                              "example": 10115
+                            },
+                            "city": {
+                              "type": "string",
+                              "example": "Berlin"
+                            },
+                            "state": {
+                              "type": "string",
+                              "example": "Berlin"
+                            },
+                            "country": {
+                              "type": "string",
+                              "example": "Germany"
+                            }
+                          }
+                        },
+                        "rooms": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer",
+                                "example": 1
+                              },
+                              "room_name": {
+                                "type": "string",
+                                "example": "Examination Room 1"
+                              },
+                              "comment": {
+                                "type": "string",
+                                "example": "First floor"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "management"
+          ]
+        },
+        "post": {
+          "operationId": "management_locations_create",
+          "description": "Create a new doctor's office location",
+          "parameters": [
+            {
+              "name": "data",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "required": [
+                  "address_id"
+                ],
+                "type": "object",
+                "properties": {
+                  "address_id": {
+                    "type": "integer",
+                    "example": 2
+                  },
+                  "phone_number": {
+                    "type": "string",
+                    "example": "+1234567890"
+                  },
+                  "friendly_name": {
+                    "type": "string",
+                    "example": "Main Office"
+                  }
+                }
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "example": 1
+                      },
+                      "address_id": {
+                        "type": "integer",
+                        "example": 2
+                      },
+                      "phone_number": {
+                        "type": "string",
+                        "example": "+1234567890"
+                      },
+                      "friendly_name": {
+                        "type": "string",
+                        "example": "Main Office"
+                      },
+                      "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2023-01-15T10:30:00Z"
+                      },
+                      "address_details": {
+                        "type": "object",
+                        "properties": {
+                          "street": {
+                            "type": "string",
+                            "example": "Main Street"
+                          },
+                          "street_number": {
+                            "type": "string",
+                            "example": "123"
+                          }
+                        }
+                      },
+                      "address_city": {
+                        "type": "object",
+                        "properties": {
+                          "city_code": {
+                            "type": "integer",
+                            "example": 10115
+                          },
+                          "city": {
+                            "type": "string",
+                            "example": "Berlin"
+                          },
+                          "state": {
+                            "type": "string",
+                            "example": "Berlin"
+                          },
+                          "country": {
+                            "type": "string",
+                            "example": "Germany"
+                          }
+                        }
+                      },
+                      "rooms": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "integer",
+                              "example": 1
+                            },
+                            "room_name": {
+                              "type": "string",
+                              "example": "Examination Room 1"
+                            },
+                            "comment": {
+                              "type": "string",
+                              "example": "First floor"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "management"
+          ]
+        },
+        "parameters": []
+      },
+      "/management/locations/{id}/": {
+        "get": {
+          "operationId": "management_locations_read",
+          "description": "Get a doctor's office location by ID",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "example": 1
+                      },
+                      "address_id": {
+                        "type": "integer",
+                        "example": 2
+                      },
+                      "phone_number": {
+                        "type": "string",
+                        "example": "+1234567890"
+                      },
+                      "friendly_name": {
+                        "type": "string",
+                        "example": "Main Office"
+                      },
+                      "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2023-01-15T10:30:00Z"
+                      },
+                      "address_details": {
+                        "type": "object",
+                        "properties": {
+                          "street": {
+                            "type": "string",
+                            "example": "Main Street"
+                          },
+                          "street_number": {
+                            "type": "string",
+                            "example": "123"
+                          }
+                        }
+                      },
+                      "address_city": {
+                        "type": "object",
+                        "properties": {
+                          "city_code": {
+                            "type": "integer",
+                            "example": 10115
+                          },
+                          "city": {
+                            "type": "string",
+                            "example": "Berlin"
+                          },
+                          "state": {
+                            "type": "string",
+                            "example": "Berlin"
+                          },
+                          "country": {
+                            "type": "string",
+                            "example": "Germany"
+                          }
+                        }
+                      },
+                      "rooms": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "integer",
+                              "example": 1
+                            },
+                            "room_name": {
+                              "type": "string",
+                              "example": "Examination Room 1"
+                            },
+                            "comment": {
+                              "type": "string",
+                              "example": "First floor"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "management"
+          ]
+        },
+        "put": {
+          "operationId": "management_locations_update",
+          "description": "Update a doctor's office location",
+          "parameters": [
+            {
+              "name": "data",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "required": [
+                  "address_id"
+                ],
+                "type": "object",
+                "properties": {
+                  "address_id": {
+                    "type": "integer",
+                    "example": 2
+                  },
+                  "phone_number": {
+                    "type": "string",
+                    "example": "+1234567890"
+                  },
+                  "friendly_name": {
+                    "type": "string",
+                    "example": "Main Office"
+                  }
+                }
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "example": 1
+                      },
+                      "address_id": {
+                        "type": "integer",
+                        "example": 2
+                      },
+                      "phone_number": {
+                        "type": "string",
+                        "example": "+1234567890"
+                      },
+                      "friendly_name": {
+                        "type": "string",
+                        "example": "Main Office"
+                      },
+                      "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2023-01-15T10:30:00Z"
+                      },
+                      "address_details": {
+                        "type": "object",
+                        "properties": {
+                          "street": {
+                            "type": "string",
+                            "example": "Main Street"
+                          },
+                          "street_number": {
+                            "type": "string",
+                            "example": "123"
+                          }
+                        }
+                      },
+                      "address_city": {
+                        "type": "object",
+                        "properties": {
+                          "city_code": {
+                            "type": "integer",
+                            "example": 10115
+                          },
+                          "city": {
+                            "type": "string",
+                            "example": "Berlin"
+                          },
+                          "state": {
+                            "type": "string",
+                            "example": "Berlin"
+                          },
+                          "country": {
+                            "type": "string",
+                            "example": "Germany"
+                          }
+                        }
+                      },
+                      "rooms": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "integer",
+                              "example": 1
+                            },
+                            "room_name": {
+                              "type": "string",
+                              "example": "Examination Room 1"
+                            },
+                            "comment": {
+                              "type": "string",
+                              "example": "First floor"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "management"
+          ]
+        },
+        "delete": {
+          "operationId": "management_locations_delete",
+          "description": "Delete a doctor's office location",
+          "parameters": [],
+          "responses": {
+            "204": {
+              "description": "Doctor's office location deleted successfully"
+            }
+          },
+          "tags": [
+            "management"
+          ]
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ]
+      },
+      "/management/m1-sync/": {
+        "get": {
+          "operationId": "management_m1-sync_list",
+          "description": "Manually trigger a sync of recent M1 patients",
+          "parameters": [],
+          "responses": {
+            "202": {
+              "description": "Sync task triggered successfully",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "example": "success"
+                  },
+                  "message": {
+                    "type": "string",
+                    "example": "M1 patient sync task has been triggered"
+                  },
+                  "task_id": {
+                    "type": "string",
+                    "example": "12345678-1234-1234-1234-123456789abc"
+                  }
+                }
+              }
+            },
+            "500": {
+              "description": "Error triggering sync task",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "example": "error"
+                  },
+                  "message": {
+                    "type": "string",
+                    "example": "Failed to trigger M1 patient sync task"
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "management"
+          ]
+        },
+        "parameters": []
+      },
+      "/management/resources/": {
+        "get": {
+          "operationId": "management_resources_list",
+          "description": "Get all resources",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "example": 1
+                        },
+                        "resource_type_id": {
+                          "type": "integer",
+                          "example": 2
+                        },
+                        "used": {
+                          "type": "boolean",
+                          "example": false
+                        },
+                        "inventar_nr": {
+                          "type": "string",
+                          "example": "INV-001"
+                        },
+                        "doctors_office_location_id": {
+                          "type": "integer",
+                          "example": 1
+                        },
+                        "updated_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "example": "2023-01-15T10:30:00Z"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "management"
+          ]
+        },
+        "post": {
+          "operationId": "management_resources_create",
+          "description": "Create a new resource",
+          "parameters": [
+            {
+              "name": "data",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "required": [
+                  "resource_type",
+                  "doctors_office_location"
+                ],
+                "type": "object",
+                "properties": {
+                  "resource_type": {
+                    "type": "integer",
+                    "example": 2
+                  },
+                  "used": {
+                    "type": "boolean",
+                    "example": false
+                  },
+                  "inventar_nr": {
+                    "type": "string",
+                    "example": "INV-001"
+                  },
+                  "doctors_office_location": {
+                    "type": "integer",
+                    "example": 1
+                  }
+                }
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "example": 1
+                      },
+                      "resource_type_id": {
+                        "type": "integer",
+                        "example": 2
+                      },
+                      "used": {
+                        "type": "boolean",
+                        "example": false
+                      },
+                      "inventar_nr": {
+                        "type": "string",
+                        "example": "INV-001"
+                      },
+                      "doctors_office_location_id": {
+                        "type": "integer",
+                        "example": 1
+                      },
+                      "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2023-01-15T10:30:00Z"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "management"
+          ]
+        },
+        "parameters": []
+      },
+      "/management/resources/{id}/": {
+        "get": {
+          "operationId": "management_resources_read",
+          "description": "Get a resource by ID",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "example": 1
+                      },
+                      "resource_type_id": {
+                        "type": "integer",
+                        "example": 2
+                      },
+                      "used": {
+                        "type": "boolean",
+                        "example": false
+                      },
+                      "inventar_nr": {
+                        "type": "string",
+                        "example": "INV-001"
+                      },
+                      "doctors_office_location_id": {
+                        "type": "integer",
+                        "example": 1
+                      },
+                      "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2023-01-15T10:30:00Z"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "management"
+          ]
+        },
+        "put": {
+          "operationId": "management_resources_update",
+          "description": "Update a resource",
+          "parameters": [
+            {
+              "name": "data",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "required": [
+                  "resource_type",
+                  "doctors_office_location"
+                ],
+                "type": "object",
+                "properties": {
+                  "resource_type": {
+                    "type": "integer",
+                    "example": 2
+                  },
+                  "used": {
+                    "type": "boolean",
+                    "example": false
+                  },
+                  "inventar_nr": {
+                    "type": "string",
+                    "example": "INV-001"
+                  },
+                  "doctors_office_location": {
+                    "type": "integer",
+                    "example": 1
+                  }
+                }
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "example": 1
+                      },
+                      "resource_type_id": {
+                        "type": "integer",
+                        "example": 2
+                      },
+                      "used": {
+                        "type": "boolean",
+                        "example": false
+                      },
+                      "inventar_nr": {
+                        "type": "string",
+                        "example": "INV-001"
+                      },
+                      "doctors_office_location_id": {
+                        "type": "integer",
+                        "example": 1
+                      },
+                      "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2023-01-15T10:30:00Z"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "management"
+          ]
+        },
+        "delete": {
+          "operationId": "management_resources_delete",
+          "description": "Delete a resource",
+          "parameters": [],
+          "responses": {
+            "204": {
+              "description": "Resource deleted successfully"
+            }
+          },
+          "tags": [
+            "management"
+          ]
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ]
+      },
+      "/management/rooms/": {
+        "get": {
+          "operationId": "management_rooms_list",
+          "description": "Get all rooms",
+          "parameters": [
+            {
+              "name": "location",
+              "in": "query",
+              "description": "Filter rooms by location ID",
+              "required": false,
+              "type": "integer"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "example": 1
+                        },
+                        "room_name": {
+                          "type": "string",
+                          "example": "Examination Room 1"
+                        },
+                        "comment": {
+                          "type": "string",
+                          "example": "Main floor, east wing"
+                        },
+                        "location": {
+                          "description": "Doctor's office location ID (read-only)",
+                          "type": "integer",
+                          "example": 2
+                        },
+                        "location_name": {
+                          "description": "Doctor's office location name (read-only)",
+                          "type": "string",
+                          "example": "Main Office"
+                        },
+                        "updated_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "example": "2023-01-15T10:30:00Z"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "management"
+          ]
+        },
+        "post": {
+          "operationId": "management_rooms_create",
+          "description": "Create a new room",
+          "parameters": [
+            {
+              "name": "data",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "required": [
+                  "room_name"
+                ],
+                "type": "object",
+                "properties": {
+                  "room_name": {
+                    "type": "string",
+                    "example": "Examination Room 1"
+                  },
+                  "comment": {
+                    "type": "string",
+                    "example": "Main floor, east wing"
+                  },
+                  "location": {
+                    "description": "Doctor's office location ID",
+                    "type": "integer",
+                    "example": 2
+                  }
+                }
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "example": 1
+                      },
+                      "room_name": {
+                        "type": "string",
+                        "example": "Examination Room 1"
+                      },
+                      "comment": {
+                        "type": "string",
+                        "example": "Main floor, east wing"
+                      },
+                      "location": {
+                        "description": "Doctor's office location ID (read-only)",
+                        "type": "integer",
+                        "example": 2
+                      },
+                      "location_name": {
+                        "description": "Doctor's office location name (read-only)",
+                        "type": "string",
+                        "example": "Main Office"
+                      },
+                      "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2023-01-15T10:30:00Z"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "management"
+          ]
+        },
+        "parameters": []
+      },
+      "/management/rooms/{id}/": {
+        "get": {
+          "operationId": "management_rooms_read",
+          "description": "Get a room by ID",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "example": 1
+                      },
+                      "room_name": {
+                        "type": "string",
+                        "example": "Examination Room 1"
+                      },
+                      "comment": {
+                        "type": "string",
+                        "example": "Main floor, east wing"
+                      },
+                      "location": {
+                        "description": "Doctor's office location ID (read-only)",
+                        "type": "integer",
+                        "example": 2
+                      },
+                      "location_name": {
+                        "description": "Doctor's office location name (read-only)",
+                        "type": "string",
+                        "example": "Main Office"
+                      },
+                      "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2023-01-15T10:30:00Z"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "management"
+          ]
+        },
+        "put": {
+          "operationId": "management_rooms_update",
+          "description": "Update a room",
+          "parameters": [
+            {
+              "name": "data",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "required": [
+                  "room_name"
+                ],
+                "type": "object",
+                "properties": {
+                  "room_name": {
+                    "type": "string",
+                    "example": "Examination Room 1"
+                  },
+                  "comment": {
+                    "type": "string",
+                    "example": "Main floor, east wing"
+                  },
+                  "location": {
+                    "description": "Doctor's office location ID",
+                    "type": "integer",
+                    "example": 2
+                  }
+                }
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "example": 1
+                      },
+                      "room_name": {
+                        "type": "string",
+                        "example": "Examination Room 1"
+                      },
+                      "comment": {
+                        "type": "string",
+                        "example": "Main floor, east wing"
+                      },
+                      "location": {
+                        "description": "Doctor's office location ID (read-only)",
+                        "type": "integer",
+                        "example": 2
+                      },
+                      "location_name": {
+                        "description": "Doctor's office location name (read-only)",
+                        "type": "string",
+                        "example": "Main Office"
+                      },
+                      "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2023-01-15T10:30:00Z"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "management"
+          ]
+        },
+        "delete": {
+          "operationId": "management_rooms_delete",
+          "description": "Delete a room",
+          "parameters": [],
+          "responses": {
+            "204": {
+              "description": "Room deleted successfully"
+            }
+          },
+          "tags": [
+            "management"
+          ]
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ]
+      },
+      "/patients/api/emails/": {
+        "get": {
+          "operationId": "patients_api_emails_list",
+          "description": "API endpoint for emails",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "",
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/Email"
+                }
+              }
+            }
+          },
+          "tags": [
+            "patients"
+          ]
+        },
+        "post": {
+          "operationId": "patients_api_emails_create",
+          "description": "API endpoint for emails",
+          "parameters": [
+            {
+              "name": "data",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/Email"
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "",
+              "schema": {
+                "$ref": "#/definitions/Email"
+              }
+            }
+          },
+          "tags": [
+            "patients"
+          ]
+        },
+        "parameters": []
+      },
+      "/patients/api/emails/{id}/": {
+        "get": {
+          "operationId": "patients_api_emails_read",
+          "description": "API endpoint for emails",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "",
+              "schema": {
+                "$ref": "#/definitions/Email"
+              }
+            }
+          },
+          "tags": [
+            "patients"
+          ]
+        },
+        "put": {
+          "operationId": "patients_api_emails_update",
+          "description": "API endpoint for emails",
+          "parameters": [
+            {
+              "name": "data",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/Email"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "",
+              "schema": {
+                "$ref": "#/definitions/Email"
+              }
+            }
+          },
+          "tags": [
+            "patients"
+          ]
+        },
+        "patch": {
+          "operationId": "patients_api_emails_partial_update",
+          "description": "API endpoint for emails",
+          "parameters": [
+            {
+              "name": "data",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/Email"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "",
+              "schema": {
+                "$ref": "#/definitions/Email"
+              }
+            }
+          },
+          "tags": [
+            "patients"
+          ]
+        },
+        "delete": {
+          "operationId": "patients_api_emails_delete",
+          "description": "API endpoint for emails",
+          "parameters": [],
+          "responses": {
+            "204": {
+              "description": ""
+            }
+          },
+          "tags": [
+            "patients"
+          ]
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "A unique integer value identifying this email.",
+            "required": true,
+            "type": "integer"
+          }
+        ]
+      },
+      "/patients/api/patients/": {
+        "get": {
+          "operationId": "patients_api_patients_list",
+          "description": "API endpoint for patients",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "",
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/Patient"
+                }
+              }
+            }
+          },
+          "tags": [
+            "patients"
+          ]
+        },
+        "post": {
+          "operationId": "patients_api_patients_create",
+          "description": "API endpoint for patients",
+          "parameters": [
+            {
+              "name": "data",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/Patient"
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "",
+              "schema": {
+                "$ref": "#/definitions/Patient"
+              }
+            }
+          },
+          "tags": [
+            "patients"
+          ]
+        },
+        "parameters": []
+      },
+      "/patients/api/patients/{id}/": {
+        "get": {
+          "operationId": "patients_api_patients_read",
+          "description": "API endpoint for patients",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "",
+              "schema": {
+                "$ref": "#/definitions/Patient"
+              }
+            }
+          },
+          "tags": [
+            "patients"
+          ]
+        },
+        "put": {
+          "operationId": "patients_api_patients_update",
+          "description": "API endpoint for patients",
+          "parameters": [
+            {
+              "name": "data",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/Patient"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "",
+              "schema": {
+                "$ref": "#/definitions/Patient"
+              }
+            }
+          },
+          "tags": [
+            "patients"
+          ]
+        },
+        "patch": {
+          "operationId": "patients_api_patients_partial_update",
+          "description": "API endpoint for patients",
+          "parameters": [
+            {
+              "name": "data",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/Patient"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "",
+              "schema": {
+                "$ref": "#/definitions/Patient"
+              }
+            }
+          },
+          "tags": [
+            "patients"
+          ]
+        },
+        "delete": {
+          "operationId": "patients_api_patients_delete",
+          "description": "API endpoint for patients",
+          "parameters": [],
+          "responses": {
+            "204": {
+              "description": ""
+            }
+          },
+          "tags": [
+            "patients"
+          ]
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "A unique integer value identifying this patient.",
+            "required": true,
+            "type": "integer"
+          }
+        ]
+      },
+      "/patients/api/phones/": {
+        "get": {
+          "operationId": "patients_api_phones_list",
+          "description": "API endpoint for phone numbers",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "",
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/Phone"
+                }
+              }
+            }
+          },
+          "tags": [
+            "patients"
+          ]
+        },
+        "post": {
+          "operationId": "patients_api_phones_create",
+          "description": "API endpoint for phone numbers",
+          "parameters": [
+            {
+              "name": "data",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/Phone"
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "",
+              "schema": {
+                "$ref": "#/definitions/Phone"
+              }
+            }
+          },
+          "tags": [
+            "patients"
+          ]
+        },
+        "parameters": []
+      },
+      "/patients/api/phones/{id}/": {
+        "get": {
+          "operationId": "patients_api_phones_read",
+          "description": "API endpoint for phone numbers",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "",
+              "schema": {
+                "$ref": "#/definitions/Phone"
+              }
+            }
+          },
+          "tags": [
+            "patients"
+          ]
+        },
+        "put": {
+          "operationId": "patients_api_phones_update",
+          "description": "API endpoint for phone numbers",
+          "parameters": [
+            {
+              "name": "data",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/Phone"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "",
+              "schema": {
+                "$ref": "#/definitions/Phone"
+              }
+            }
+          },
+          "tags": [
+            "patients"
+          ]
+        },
+        "patch": {
+          "operationId": "patients_api_phones_partial_update",
+          "description": "API endpoint for phone numbers",
+          "parameters": [
+            {
+              "name": "data",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/Phone"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "",
+              "schema": {
+                "$ref": "#/definitions/Phone"
+              }
+            }
+          },
+          "tags": [
+            "patients"
+          ]
+        },
+        "delete": {
+          "operationId": "patients_api_phones_delete",
+          "description": "API endpoint for phone numbers",
+          "parameters": [],
+          "responses": {
+            "204": {
+              "description": ""
+            }
+          },
+          "tags": [
+            "patients"
+          ]
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "A unique integer value identifying this phone.",
+            "required": true,
+            "type": "integer"
+          }
+        ]
+      },
+      "/voice/appointment_types/": {
+        "get": {
+          "operationId": "voice_appointment_types_list",
+          "summary": "Get All Non-Intern Appointment Types with Locations",
+          "description": "Retrieves all appointment types with their details, excluding those with 'intern' status. For each appointment type, includes a list of locations where it is available. This endpoint is designed specifically for voice interfaces.",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "Success - Returns a list of all appointment types excluding intern types, with locations",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "appointment_types": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "description": "Appointment type ID",
+                          "type": "integer"
+                        },
+                        "type": {
+                          "description": "Name of the appointment type",
+                          "type": "string"
+                        },
+                        "macro_type": {
+                          "description": "Higher-level category of the appointment type",
+                          "type": "string"
+                        },
+                        "bookable": {
+                          "description": "Booking status: 'always' (always available) or 'patient_verified' (after patient verification)",
+                          "type": "string",
+                          "enum": [
+                            "always",
+                            "patient_verified"
+                          ]
+                        },
+                        "locations": {
+                          "description": "List of locations where this appointment type is available",
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "description": "Location ID",
+                                "type": "integer"
+                              },
+                              "friendly_name": {
+                                "description": "User-friendly name of the location",
+                                "type": "string"
+                              },
+                              "phone_number": {
+                                "description": "Contact phone number for the location",
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "500": {
+              "description": "Server Error - Failed to retrieve appointment types",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "error": {
+                    "description": "Error message",
+                    "type": "string"
+                  },
+                  "details": {
+                    "description": "Detailed error information",
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "voice"
+          ]
+        },
+        "parameters": []
+      },
+      "/voice/book_appointment/": {
+        "post": {
+          "operationId": "voice_book_appointment_create",
+          "description": "Book a new appointment or reschedule an existing appointment",
+          "parameters": [
+            {
+              "name": "data",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "required": [
+                  "startTime",
+                  "groupId"
+                ],
+                "type": "object",
+                "properties": {
+                  "startTime": {
+                    "description": "The desired start time for the appointment in ISO format or other supported formats",
+                    "type": "string"
+                  },
+                  "groupId": {
+                    "description": "The configuration group ID that defines which appointment type(s) to book",
+                    "type": "integer"
+                  },
+                  "relationStatus": {
+                    "description": "Relationship between caller and patient. Use 'self' when booking for themselves",
+                    "type": "string"
+                  },
+                  "phoneNumber": {
+                    "description": "Patient's phone number, preferably in E.164 format (e.g., '+491234567890')",
+                    "type": "string"
+                  },
+                  "name": {
+                    "description": "Patient's first name (required if patient not found)",
+                    "type": "string"
+                  },
+                  "surname": {
+                    "description": "Patient's last name (required if patient not found)",
+                    "type": "string"
+                  },
+                  "dateOfBirth": {
+                    "description": "Patient's date of birth in format YYYY-MM-DD",
+                    "type": "string"
+                  },
+                  "email": {
+                    "description": "Patient's email address",
+                    "type": "string"
+                  },
+                  "anamnesis": {
+                    "description": "Medical history information or reason for visit",
+                    "type": "string"
+                  },
+                  "referralSlip": {
+                    "description": "Whether the patient has a referral slip from another doctor",
+                    "type": "boolean"
+                  },
+                  "cityCode": {
+                    "description": "City postal code for the patient's address (e.g., '10115' for Berlin)",
+                    "type": "string"
+                  },
+                  "dataValidated": {
+                    "description": "Whether patient data has been validated during the call",
+                    "type": "boolean"
+                  },
+                  "fromWidget": {
+                    "description": "Whether the booking request came from the website widget",
+                    "type": "boolean"
+                  },
+                  "allowContact": {
+                    "description": "Whether the patient has consented to being contacted",
+                    "type": "boolean"
+                  },
+                  "sendSms": {
+                    "description": "Whether to send SMS confirmation messages",
+                    "type": "boolean"
+                  },
+                  "enteredBy": {
+                    "description": "Who created the appointment (bot, widget, staff)",
+                    "type": "string"
+                  },
+                  "bookingNumber": {
+                    "description": "For rescheduling - original booking number to reschedule",
+                    "type": "integer"
+                  },
+                  "location": {
+                    "description": "Location ID (ignored if configuration specifies a location)",
+                    "type": "integer"
+                  }
+                },
+                "example": {
+                  "startTime": "2024-05-30T10:00:00+01:00",
+                  "groupId": 1,
+                  "relationStatus": "self",
+                  "phoneNumber": "+491234567890",
+                  "name": "Max",
+                  "surname": "Mustermann",
+                  "dateOfBirth": "1990-01-01",
+                  "email": "max@example.com",
+                  "anamnesis": "Lower back pain for 2 weeks",
+                  "referralSlip": true,
+                  "cityCode": "10115",
+                  "dataValidated": true,
+                  "allowContact": true,
+                  "sendSms": true,
+                  "enteredBy": "bot",
+                  "location": 2
+                }
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "Appointment booked successfully",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "success": {
+                    "type": "boolean"
+                  },
+                  "appointment": {
+                    "type": "integer"
+                  },
+                  "booking_number": {
+                    "type": "integer"
+                  },
+                  "message": {
+                    "type": "string"
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "appointment": 123,
+                  "booking_number": 12345,
+                  "message": "Appointment booked successfully"
+                }
+              }
+            },
+            "400": {
+              "description": "Bad Request",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "success": {
+                    "type": "boolean"
+                  },
+                  "error": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "voice"
+          ]
+        },
+        "parameters": []
+      },
+      "/voice/caller_by_phonenr/": {
+        "post": {
+          "operationId": "voice_caller_by_phonenr_create",
+          "description": "Identify a caller by their phone number",
+          "parameters": [
+            {
+              "name": "data",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "from_number": {
+                    "description": "The caller's phone number to look up",
+                    "type": "string"
+                  },
+                  "call_inbound": {
+                    "type": "object",
+                    "properties": {
+                      "from_number": {
+                        "description": "The caller's phone number when coming from call system",
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "from_number": "+491234567890"
+                }
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Caller identification successful",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "call_inbound": {
+                    "type": "object",
+                    "properties": {
+                      "dynamic_variables": {
+                        "type": "object",
+                        "properties": {
+                          "nummer_bekannt": {
+                            "description": "Whether the caller is known ('bekannt') or unknown ('unbekannt')",
+                            "type": "string"
+                          },
+                          "anrufer_nachname": {
+                            "description": "Last name of the caller if recognized",
+                            "type": "string"
+                          },
+                          "anrufer_geburtsdatum": {
+                            "description": "Date of birth of the caller in format YYYY-MM-DD",
+                            "type": "string"
+                          },
+                          "anrufer_vorname": {
+                            "description": "First name of the caller if recognized",
+                            "type": "string"
+                          },
+                          "anrufer_plz": {
+                            "description": "Postal code of the caller if available",
+                            "type": "string"
+                          },
+                          "current_date": {
+                            "description": "Current formatted date and time",
+                            "type": "string"
+                          },
+                          "queue_number": {
+                            "description": "Random queue number between 100-200",
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "call_inbound": {
+                    "dynamic_variables": {
+                      "nummer_bekannt": "bekannt",
+                      "anrufer_nachname": "Mustermann",
+                      "anrufer_geburtsdatum": "1990-01-01",
+                      "anrufer_vorname": "Max",
+                      "anrufer_plz": "10115",
+                      "current_date": "Monday, 30.05.2024-10:15",
+                      "queue_number": "142"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "voice"
+          ]
+        },
+        "parameters": []
+      },
+      "/voice/cancel_appointment/": {
+        "post": {
+          "operationId": "voice_cancel_appointment_create",
+          "description": "Cancel an appointment by booking number and date of birth",
+          "parameters": [
+            {
+              "name": "data",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "required": [
+                  "bookingNumber",
+                  "dateOfBirth"
+                ],
+                "type": "object",
+                "properties": {
+                  "bookingNumber": {
+                    "description": "The unique booking number of the appointment to cancel",
+                    "type": "integer"
+                  },
+                  "dateOfBirth": {
+                    "description": "Patient's date of birth in format YYYY-MM-DD (for verification)",
+                    "type": "string"
+                  }
+                },
+                "example": {
+                  "bookingNumber": 12345,
+                  "dateOfBirth": "1990-01-01"
+                }
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Appointment successfully canceled",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "success": {
+                    "description": "Whether the cancellation was successful",
+                    "type": "boolean"
+                  },
+                  "message": {
+                    "description": "Confirmation message including number of appointments canceled",
+                    "type": "string"
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Successfully cancelled 2 appointment(s)"
+                }
+              }
+            },
+            "400": {
+              "description": "Bad Request",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "success": {
+                    "type": "boolean"
+                  },
+                  "error": {
+                    "type": "string"
+                  }
+                },
+                "example": {
+                  "success": false,
+                  "error": "No appointments found or verification failed"
+                }
+              }
+            },
+            "404": {
+              "description": "Not Found",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "success": {
+                    "type": "boolean"
+                  },
+                  "error": {
+                    "type": "string"
+                  }
+                },
+                "example": {
+                  "success": false,
+                  "error": "No appointments found or verification failed"
+                }
+              }
+            }
+          },
+          "tags": [
+            "voice"
+          ]
+        },
+        "parameters": []
+      },
+      "/voice/eoc/": {
+        "post": {
+          "operationId": "voice_eoc_create",
+          "description": "POST /api/v1/voice/eoc/",
+          "parameters": [],
+          "responses": {
+            "201": {
+              "description": ""
+            }
+          },
+          "tags": [
+            "voice"
+          ]
+        },
+        "parameters": []
+      },
+      "/voice/locations/": {
+        "get": {
+          "operationId": "voice_locations_list",
+          "summary": "Get All Practice Locations with Appointment Types",
+          "description": "Retrieves all practice locations with their addresses, contact information, and available appointment types. This endpoint is designed specifically for voice interfaces to provide location information without room details.",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "Success - Returns a list of all practice locations with address information and appointment types",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "locations": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "description": "Location ID",
+                          "type": "integer"
+                        },
+                        "friendly_name": {
+                          "description": "User-friendly name of the location",
+                          "type": "string"
+                        },
+                        "phone_number": {
+                          "description": "Contact phone number for the location",
+                          "type": "string"
+                        },
+                        "address": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "description": "Address ID",
+                              "type": "integer"
+                            },
+                            "street": {
+                              "description": "Street name",
+                              "type": "string"
+                            },
+                            "house_number": {
+                              "description": "House/building number",
+                              "type": "string"
+                            },
+                            "city": {
+                              "description": "City name",
+                              "type": "string"
+                            },
+                            "postal_code": {
+                              "description": "Postal/ZIP code",
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "appointment_types": {
+                          "description": "List of appointment types available at this location (excluding intern types)",
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "description": "Appointment type ID",
+                                "type": "integer"
+                              },
+                              "type": {
+                                "description": "Name of the appointment type",
+                                "type": "string"
+                              },
+                              "macro_type": {
+                                "description": "Higher-level category of the appointment type",
+                                "type": "string"
+                              },
+                              "bookable": {
+                                "description": "Booking status: 'always' (always available) or 'patient_verified' (after patient verification)",
+                                "type": "string",
+                                "enum": [
+                                  "always",
+                                  "patient_verified"
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "500": {
+              "description": "Server Error - Failed to retrieve locations",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "error": {
+                    "description": "Error message",
+                    "type": "string"
+                  },
+                  "details": {
+                    "description": "Detailed error information",
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "voice"
+          ]
+        },
+        "parameters": []
+      },
+      "/voice/next_available_appointments/": {
+        "post": {
+          "operationId": "voice_next_available_appointments_create",
+          "description": "Find next available appointment slots",
+          "parameters": [
+            {
+              "name": "data",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "required": [
+                  "args"
+                ],
+                "type": "object",
+                "properties": {
+                  "args": {
+                    "required": [
+                      "appointmentType",
+                      "location"
+                    ],
+                    "type": "object",
+                    "properties": {
+                      "appointmentType": {
+                        "description": "The appointment type configuration ID",
+                        "type": "integer"
+                      },
+                      "location": {
+                        "description": "The doctor's office location ID",
+                        "type": "integer"
+                      },
+                      "scheduleFor": {
+                        "description": "The date to search for appointments (format: YYYY-MM-DD)",
+                        "type": "string"
+                      },
+                      "doctorId": {
+                        "description": "Specific doctor ID to filter by (optional)",
+                        "type": "integer"
+                      }
+                    }
+                  },
+                  "call": {
+                    "type": "object",
+                    "properties": {
+                      "from_number": {
+                        "description": "Caller's phone number for preferred doctor lookup",
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "args": {
+                    "appointmentType": 1,
+                    "location": 2,
+                    "scheduleFor": "2024-05-30"
+                  },
+                  "call": {
+                    "from_number": "+491234567890"
+                  }
+                }
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Available appointment slots found",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "available_groups": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "group_id": {
+                          "type": "integer"
+                        },
+                        "start_time": {
+                          "type": "string"
+                        },
+                        "slots": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "start_time": {
+                                "type": "string"
+                              },
+                              "end_time": {
+                                "type": "string"
+                              },
+                              "duration": {
+                                "type": "integer"
+                              },
+                              "configuration_id": {
+                                "type": "integer"
+                              },
+                              "doctor_id": {
+                                "type": "integer"
+                              },
+                              "doctor_name": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "available_groups": [
+                    {
+                      "group_id": 123,
+                      "start_time": "2024-05-30T10:00:00Z",
+                      "slots": [
+                        {
+                          "start_time": "2024-05-30T10:00:00Z",
+                          "end_time": "2024-05-30T10:30:00Z",
+                          "duration": 30,
+                          "configuration_id": 456,
+                          "doctor_id": 789,
+                          "doctor_name": "Dr. Smith"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            },
+            "400": {
+              "description": "Bad Request",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "error": {
+                    "type": "string"
+                  }
+                },
+                "example": {
+                  "error": "Missing appointmentType parameter"
+                }
+              }
+            },
+            "404": {
+              "description": "Not Found",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "error": {
+                    "type": "string"
+                  }
+                },
+                "example": {
+                  "error": "Invalid appointment type: 999"
+                }
+              }
+            },
+            "500": {
+              "description": "Internal Server Error",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "error": {
+                    "type": "string"
+                  }
+                },
+                "example": {
+                  "error": "Internal server error: An unexpected error occurred"
+                }
+              }
+            }
+          },
+          "tags": [
+            "voice"
+          ]
+        },
+        "parameters": []
+      },
+      "/voice/verify_appointment_info/": {
+        "post": {
+          "operationId": "voice_verify_appointment_info_create",
+          "description": "Verify if an appointment exists and is active (not canceled)",
+          "parameters": [
+            {
+              "name": "data",
+              "in": "body",
+              "required": true,
+              "schema": {
+                "required": [
+                  "bookingNumber",
+                  "dateOfBirth"
+                ],
+                "type": "object",
+                "properties": {
+                  "bookingNumber": {
+                    "description": "The unique booking number of the appointment",
+                    "type": "integer"
+                  },
+                  "dateOfBirth": {
+                    "description": "Patient's date of birth in format YYYY-MM-DD (e.g., '1990-01-01')",
+                    "type": "string"
+                  }
+                },
+                "example": {
+                  "bookingNumber": 12345,
+                  "dateOfBirth": "1990-01-01"
+                }
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Appointment verified successfully",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "scheduled_for_datetime": {
+                          "type": "string"
+                        },
+                        "booking_number": {
+                          "type": "integer"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "surname": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Bad Request",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "error": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Not Found",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "error": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "tags": [
+            "voice"
+          ]
+        },
+        "parameters": []
+      },
+      "/widget/book_appointment/": {
+        "post": {
+          "operationId": "widget_book_appointment_create",
+          "summary": "Handle POST requests for widget booking",
+          "description": "This method creates a new appointment with \"validating\" status and sends a \nverification email. Email verification is only required for widget bookings.",
+          "parameters": [],
+          "responses": {
+            "201": {
+              "description": ""
+            }
+          },
+          "tags": [
+            "widget"
+          ]
+        },
+        "parameters": []
+      }
+    },
+    "definitions": {
+      "Appointment": {
+        "required": [
+          "scheduled_for_datetime",
+          "relation_status"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "title": "ID",
+            "type": "integer",
+            "readOnly": true
+          },
+          "employee_id": {
+            "title": "Employee id",
+            "type": "integer",
+            "readOnly": true
+          },
+          "employee_first_name": {
+            "title": "Employee first name",
+            "type": "string",
+            "readOnly": true,
+            "minLength": 1
+          },
+          "employee_last_name": {
+            "title": "Employee last name",
+            "type": "string",
+            "readOnly": true,
+            "minLength": 1
+          },
+          "employee_title": {
+            "title": "Employee title",
+            "type": "string",
+            "readOnly": true,
+            "minLength": 1
+          },
+          "employee_role": {
+            "title": "Employee role",
+            "type": "string",
+            "readOnly": true,
+            "minLength": 1
+          },
+          "appointment_type_id": {
+            "title": "Appointment type id",
+            "type": "integer",
+            "readOnly": true
+          },
+          "appointment_type_configuration_id": {
+            "title": "Appointment type configuration id",
+            "type": "integer",
+            "readOnly": true
+          },
+          "can_be_deleted": {
+            "title": "Can be deleted",
+            "type": "string",
+            "readOnly": true
+          },
+          "scheduled_for_datetime": {
+            "title": "Scheduled for datetime",
+            "type": "string",
+            "format": "date-time"
+          },
+          "duration_in_minutes": {
+            "title": "Duration in minutes",
+            "type": "integer",
+            "maximum": 2147483647,
+            "minimum": -2147483648,
+            "x-nullable": true
+          },
+          "relation_status": {
+            "title": "Relation status",
+            "type": "string",
+            "enum": [
+              "doctor",
+              "relative",
+              "self",
+              "Nurse"
+            ]
+          },
+          "booking_number": {
+            "title": "Booking number",
+            "type": "integer",
+            "maximum": 2147483647,
+            "minimum": -2147483648,
+            "x-nullable": true
+          },
+          "name": {
+            "title": "Name",
+            "type": "string",
+            "maxLength": 255,
+            "x-nullable": true
+          },
+          "surname": {
+            "title": "Surname",
+            "type": "string",
+            "maxLength": 255,
+            "x-nullable": true
+          },
+          "date_of_birth": {
+            "title": "Date of birth",
+            "type": "string",
+            "format": "date",
+            "x-nullable": true
+          },
+          "city_code": {
+            "title": "City code",
+            "type": "integer",
+            "maximum": 2147483647,
+            "minimum": -2147483648,
+            "x-nullable": true
+          },
+          "email": {
+            "title": "Email",
+            "type": "string",
+            "format": "email",
+            "maxLength": 254,
+            "x-nullable": true
+          },
+          "phone_number": {
+            "title": "Phone number",
+            "type": "string",
+            "maxLength": 20,
+            "x-nullable": true
+          },
+          "anamnesis": {
+            "title": "Anamnesis",
+            "type": "string",
+            "x-nullable": true
+          },
+          "referral_slip": {
+            "title": "Referral slip",
+            "type": "string",
+            "x-nullable": true
+          },
+          "comment": {
+            "title": "Comment",
+            "type": "string",
+            "x-nullable": true
+          },
+          "change_reason": {
+            "title": "Change reason",
+            "type": "string",
+            "x-nullable": true
+          },
+          "num_retries": {
+            "title": "Num retries",
+            "type": "integer",
+            "maximum": 2147483647,
+            "minimum": -2147483648,
+            "x-nullable": true
+          },
+          "piz": {
+            "title": "PIZ",
+            "description": "Patient identification number",
+            "type": "string",
+            "maxLength": 255,
+            "x-nullable": true
+          },
+          "insurance_provider": {
+            "title": "Insurance provider",
+            "type": "string",
+            "maxLength": 255,
+            "x-nullable": true
+          },
+          "allow_contact": {
+            "title": "Allow contact",
+            "description": "Whether the patient has given consent to be contacted",
+            "type": "boolean"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string",
+            "enum": [
+              "created",
+              "moved",
+              "canceled",
+              "not_interested",
+              "pending",
+              "in_progress",
+              "done",
+              "blocker",
+              "no_show",
+              "reschedule",
+              "rescheduled",
+              "reschedule_failed",
+              "validating",
+              "validation_failed",
+              "finished_final",
+              "left"
+            ]
+          },
+          "entered_by": {
+            "title": "Entered by",
+            "type": "string",
+            "enum": [
+              "bot",
+              "MFA",
+              "Webseite"
+            ]
+          },
+          "updated_at": {
+            "title": "Updated at",
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "doctors_office_location": {
+            "title": "Doctors office location",
+            "description": "Doctor's office location of the appointment",
+            "type": "integer",
+            "x-nullable": true
+          },
+          "patient": {
+            "title": "Patient",
+            "type": "integer",
+            "x-nullable": true
+          },
+          "next": {
+            "title": "Next",
+            "description": "Reference to the next appointment in a linked list",
+            "type": "integer",
+            "x-nullable": true
+          },
+          "prev": {
+            "title": "Prev",
+            "description": "Reference to the previous appointment in a linked list",
+            "type": "integer",
+            "x-nullable": true
+          }
+        }
+      },
+      "Email": {
+        "required": [
+          "email",
+          "patient"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "title": "ID",
+            "type": "integer",
+            "readOnly": true
+          },
+          "email": {
+            "title": "Email",
+            "type": "string",
+            "format": "email",
+            "maxLength": 254,
+            "minLength": 1
+          },
+          "patient": {
+            "title": "Patient",
+            "type": "integer"
+          }
+        }
+      },
+      "Patient": {
+        "required": [
+          "name",
+          "surname"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "title": "ID",
+            "type": "integer",
+            "readOnly": true
+          },
+          "piz": {
+            "title": "PIZ",
+            "description": "Patient identification number",
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "x-nullable": true
+          },
+          "name": {
+            "title": "Name",
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1
+          },
+          "surname": {
+            "title": "Surname",
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1
+          },
+          "title": {
+            "title": "Title",
+            "type": "string",
+            "maxLength": 50,
+            "x-nullable": true
+          },
+          "date_of_birth": {
+            "title": "Date of birth",
+            "type": "string",
+            "format": "date",
+            "x-nullable": true
+          },
+          "gender": {
+            "title": "Gender",
+            "type": "string",
+            "enum": [
+              "male",
+              "female",
+              "undefined"
+            ],
+            "x-nullable": true
+          },
+          "comment": {
+            "title": "Comment",
+            "type": "string",
+            "x-nullable": true
+          },
+          "insurance_provider": {
+            "title": "Insurance provider",
+            "description": "Insurance provider name (Kostenträgername, KVDT field 4134)",
+            "type": "string",
+            "maxLength": 255,
+            "x-nullable": true
+          },
+          "insurance_number": {
+            "title": "Insurance number",
+            "description": "Patient insurance number",
+            "type": "string",
+            "maxLength": 255,
+            "x-nullable": true
+          },
+          "name_suffix": {
+            "title": "Name suffix",
+            "description": "Name suffix (Namenszusatz)",
+            "type": "string",
+            "x-nullable": true
+          },
+          "insured_type": {
+            "title": "Insured type",
+            "description": "Insurance category (KVDT field 3108: 1=Mitglied, 3=Familienversicherter, 5=Rentner)",
+            "type": "string",
+            "enum": [
+              "member",
+              "family",
+              "retiree"
+            ],
+            "x-nullable": true
+          },
+          "last_treatment": {
+            "title": "Last treatment",
+            "description": "Date of last treatment (Letzte Behandlung)",
+            "type": "string",
+            "x-nullable": true
+          },
+          "insurance_type": {
+            "title": "Insurance type",
+            "description": "Insurance type (KVDT field 4121: 0=gesetzlich/EBM, 3=privat/GOÄ)",
+            "type": "string",
+            "enum": [
+              "public",
+              "private",
+              "bmae",
+              "ego"
+            ],
+            "x-nullable": true
+          },
+          "billing_vknr": {
+            "title": "Billing vknr",
+            "description": "Billing VKNR (Abrechnungs-VKNR)",
+            "type": "string",
+            "x-nullable": true
+          },
+          "cost_bearer_id": {
+            "title": "Cost bearer id",
+            "description": "Cost bearer identification (Kostenträgerkennung)",
+            "type": "string",
+            "x-nullable": true
+          },
+          "gender_raw": {
+            "title": "Gender raw",
+            "description": "Original gender value from source system (Geschlecht)",
+            "type": "string",
+            "x-nullable": true
+          },
+          "created_m1": {
+            "title": "Created m1",
+            "description": "Creation date in M1 system",
+            "type": "string",
+            "format": "date-time",
+            "x-nullable": true
+          },
+          "last_visit": {
+            "title": "Last visit",
+            "description": "Last visit date",
+            "type": "string",
+            "format": "date-time",
+            "x-nullable": true
+          },
+          "city_code": {
+            "title": "City code",
+            "type": "string",
+            "readOnly": true
+          },
+          "street": {
+            "title": "Street",
+            "type": "string",
+            "readOnly": true
+          },
+          "street_number": {
+            "title": "Street number",
+            "type": "string",
+            "readOnly": true
+          },
+          "city_id": {
+            "title": "City id",
+            "type": "string",
+            "readOnly": true
+          }
+        }
+      },
+      "Phone": {
+        "required": [
+          "phone_number"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "title": "ID",
+            "type": "integer",
+            "readOnly": true
+          },
+          "phone_number": {
+            "title": "Phone number",
+            "type": "string",
+            "maxLength": 20,
+            "minLength": 1
+          },
+          "type": {
+            "title": "Type",
+            "type": "string",
+            "enum": [
+              "landline",
+              "mobile",
+              "local"
+            ],
+            "x-nullable": true
+          }
+        }
+      }
+    }
+  }
