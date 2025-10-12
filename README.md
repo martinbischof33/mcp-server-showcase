@@ -1,12 +1,6 @@
 # MCP Appointment Scheduler Backend
 
-This repository contains a **FastMCP** server that wraps the CalDoc REST API and exposes it as a set of MCP tools.  It powers conversational agents that can
-
-* look-up callers by phone number,
-* list practice locations and appointment types,
-* show the next free slots, and
-* book, move, or cancel appointments.
-
+This repository contains a **FastMCP** server
 ---
 
 ## Requirements
