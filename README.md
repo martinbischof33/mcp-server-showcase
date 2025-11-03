@@ -1,5 +1,3 @@
-# MCP Appointment Scheduler Backend
-
 This repository contains a **FastMCP** server
 ---
 
